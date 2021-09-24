@@ -1,5 +1,4 @@
 const express = require('express');
-const passport = require('passport');
 const router = express.Router();
 const {ensureAuth} = require('../middleware/auth');
 
@@ -8,3 +7,5 @@ const {ensureAuth} = require('../middleware/auth');
 router.get('/', ensureAuth, (req, res) => {
   res.status(200).json({message: "Welcome guys GET"})
 });
+
+module.exports = router;

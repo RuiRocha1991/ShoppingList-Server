@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
+const {ensureAuth} = require('../middleware/auth');
 const authController = require('../controllers/auth.controller');
 
 
@@ -16,21 +17,7 @@ router.get('/google/callback', passport.authenticate('customStrategy', {failureR
 
 // @desc Logout user
 // @route /auth/logout
-router.get('/logout', (req, res) => {
-  req.logout();
-  res.status(200).json({success: "logout"});
-})
+router.get('/logout', ensureAuth, authController.logout);
 
-
-/*router.post('/reactgooglelogin', (req, res) => {
-  const {tokenId} = req.body;
-  client.verifyIdToken(
-      {idToken: tokenId,
-        audience: '162632094197-rgqlvrvgoa38jtsqrp0uob1hsmvpjf7q.apps.googleusercontent.com'}
-      ).then(response => {
-        const {name, email} = response.getPayload();
-        console.log(response.getPayload());
-  });
-})*/
 
 module.exports = router;
