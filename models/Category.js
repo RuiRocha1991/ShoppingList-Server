@@ -4,7 +4,7 @@ const CategorySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true
+    index: true
   },
   description: {
     type: String,
@@ -20,8 +20,11 @@ const CategorySchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    index: true
   },
 });
+
+CategorySchema.index({ name: 1, user: 1 }, { unique: true })
 
 module.exports = mongoose.model('Category', CategorySchema);
