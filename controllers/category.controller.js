@@ -1,7 +1,17 @@
 const Category = require('../models/Category');
 
-exports.getCategories = (req, res) => {
-  res.status(200).json({message: "Welcome guys GET"})
+exports.getCategories = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const categories = await Category.find({user: userId})
+    .populate('user')
+    .sort({name: 'asc'})
+    .lean();
+    res.status(200).json({categories});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: 'Error getting all your categories', err});
+  }
 }
 
 exports.addCategory = async (req, res) => {

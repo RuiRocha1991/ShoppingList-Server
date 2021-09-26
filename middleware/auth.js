@@ -3,7 +3,7 @@ module.exports = {
     if (req.isAuthenticated()) {
       return next();
     } else {
-      res.send(401).json({message: 'Unauthorized'});
+      res.status(401).json({message: 'Unauthorized'});
     }
   }
 }
