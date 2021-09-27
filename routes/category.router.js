@@ -9,5 +9,8 @@ router.get('/', ensureAuth, categoryController.getCategories);
 router.post('/', ensureAuth, categoryController.addCategory);
 //#endregion
 
+//#region PUT
+router.put('/:id', ensureAuth, categoryController.editCategory);
+//#endregion
 
 module.exports = router;

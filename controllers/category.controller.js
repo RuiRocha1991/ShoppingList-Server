@@ -18,7 +18,36 @@ exports.addCategory = async (req, res) => {
   try {
     req.body.user = req.user.id;
     await Category.create(req.body);
-    res.status(201).json({message: "Successfully created category"});
+    res.status(201).json({message: "Category created successfully"});
+  } catch (err) {
+    if (err.name === 'MongoError' && err.code === 11000) {
+      return res.status(500).send({ success: false, message: 'Category already exist!' });
+    }
+    return res.status(500).send(err);
+  }
+}
+
+exports.editCategory = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id).lean()
+    if (!category) {
+      return res.status(404).send({success: false, message: 'Category not found!' });
+    }
+
+    if (category.user != req.user.id) {
+      return res.status(401).send({success: false, message: 'Resource is not available' });
+    } else {
+      let updatedCategory = {
+        ...category,
+        name: req.body.name,
+        description: req.body.description
+      }
+      await Category.findOneAndUpdate({_id: req.params.id}, updatedCategory, {
+        new: true,
+        runValidators: true
+      });
+      res.status(200).json({message: "Category updated successfully"});
+    }
   } catch (err) {
     if (err.name === 'MongoError' && err.code === 11000) {
       return res.status(500).send({ success: false, message: 'Category already exist!' });
