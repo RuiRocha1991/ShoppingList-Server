@@ -13,4 +13,8 @@ router.post('/', ensureAuth, categoryController.addCategory);
 router.put('/:id', ensureAuth, categoryController.editCategory);
 //#endregion
 
+//#region DELETE
+router.delete('/:id', ensureAuth, categoryController.deleteCategory);
+//#endregion
+
 module.exports = router;

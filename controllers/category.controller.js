@@ -55,3 +55,21 @@ exports.editCategory = async (req, res) => {
     return res.status(500).send(err);
   }
 }
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id).lean()
+    if (!category) {
+      return res.status(404).send({success: false, message: 'Category not found!' });
+    }
+
+    if (category.user != req.user.id) {
+      return res.status(401).send({success: false, message: 'Resource is not available' });
+    } else {
+      await Category.remove({_id: req.params.id})
+      res.status(200).json({message: "Category deleted successfully"});
+    }
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+}
