@@ -44,7 +44,7 @@ app.use(session({
 }));
 
 // Passport Middleware
-app.set('trust proxy', 1);
+app.set('trust proxy', 4);
 app.use(passport.initialize());
 app.use(passport.session());
 // passport Config
