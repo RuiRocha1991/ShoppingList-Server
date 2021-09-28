@@ -23,7 +23,8 @@
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-custom": "^1.1.1",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "should-send-same-site-none": "^2.0.5"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
