@@ -38,6 +38,7 @@ app.use(session({
   cookie: {
     expires: 86400000,
     cookie: {
+      httpOnly: false,
       sameSite: 'Lax', // must be 'none' to enable cross-site delivery
       secure: process.env.NODE_ENV === "production", // must be true if sameSite='none'
     }
