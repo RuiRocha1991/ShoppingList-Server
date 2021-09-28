@@ -9,7 +9,6 @@ const connectDB = require('./config/db');
 const cors = require('cors');
 const coockieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
-const { shouldSendSameSiteNone } = require('should-send-same-site-none');
 
 connectDB();
 
@@ -27,8 +26,6 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-app.use(shouldSendSameSiteNone);
 
 // Sessions
 app.use(session({
