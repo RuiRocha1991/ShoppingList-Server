@@ -28,11 +28,9 @@ module.exports = function (passport) {
           try {
             let user = await User.findOne({googleId: sub});
             if (user) {
-              console.log('User exist: ', user.displayName)
               done(null, user);
             } else {
               user = await User.create(newUser);
-              console.log('new User: ', user.displayName)
               done(null, user);
             }
           } catch (e) {
