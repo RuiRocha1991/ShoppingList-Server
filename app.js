@@ -28,6 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Sessions
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: true,
@@ -35,13 +36,12 @@ app.use(session({
   rolling: true,
   cookie: {
     expires: 86400000,
-    secure: true
+    secure: false
   },
   store: MongoStore.create({mongoUrl: process.env.MONGO_URI})
 }));
 
 // Passport Middleware
-app.set('trust proxy', 4);
 app.use(passport.initialize());
 app.use(passport.session());
 // passport Config
@@ -57,7 +57,8 @@ app.use(function (req, res, next) {
 app.use(cors({
   origin: process.env.CLIENT_URI, // allow to server to accept request from different origin
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true // allow session cookie from browser to pass through
+  credentials: true, // allow session cookie from browser to pass through
+
 }));
 
 app.use(coockieParser(process.env.SECRET_KEY_PARSER));
