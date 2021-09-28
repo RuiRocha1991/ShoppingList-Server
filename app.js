@@ -41,6 +41,7 @@ app.use(session({
       httpOnly: false,
       sameSite: 'Lax', // must be 'none' to enable cross-site delivery
       secure: process.env.NODE_ENV === "production", // must be true if sameSite='none'
+      secureProxy: true
     }
   },
   store: MongoStore.create({mongoUrl: process.env.MONGO_URI})
