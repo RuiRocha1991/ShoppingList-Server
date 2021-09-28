@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 // Sessions
 app.use(session({
   secret: process.env.SECRET_KEY,
-  resave: false,
+  resave: true,
   saveUninitialized: false,
   rolling: true,
   cookie: {
@@ -59,7 +59,7 @@ app.use(cors({
   credentials: true // allow session cookie from browser to pass through
 }));
 
-app.use(coockieParser(process.env.SECRET_KEY_PARSER));
+//app.use(coockieParser(process.env.SECRET_KEY_PARSER));
 
 // Routes
 app.use('/auth', require('./routes/auth'));
