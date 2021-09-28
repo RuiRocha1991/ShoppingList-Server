@@ -36,7 +36,8 @@ app.use(session({
   rolling: true,
   cookie: {
     expires: 86400000,
-    secure: false
+    secure: false,
+    httpOnly: false
   },
   store: MongoStore.create({mongoUrl: process.env.MONGO_URI})
 }));
