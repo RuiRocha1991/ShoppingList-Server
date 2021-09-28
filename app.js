@@ -32,13 +32,14 @@ app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   rolling: true,
   unset: 'destroy',
+  httpOnly: false,
+  proxy:true,
   cookie: {
     expires: 86400000,
     cookie: {
-      httpOnly: false,
       sameSite: 'Lax', // must be 'none' to enable cross-site delivery
       secure: process.env.NODE_ENV === "production", // must be true if sameSite='none'
       secureProxy: true
