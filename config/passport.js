@@ -9,6 +9,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 module.exports = function (passport) {
   passport.use('customStrategy',new CustomStrategy(
       async ( req, done) => {
+        console.log("token: ", req.body);
         const {tokenId} = req.body;
         client.verifyIdToken(
             {
@@ -17,6 +18,7 @@ module.exports = function (passport) {
             }
         ).then(async (response) => {
           const {name, sub, given_name, family_name, picture} = response.getPayload();
+          console.dir(response.getPayload());
           const newUser = {
             googleId: sub,
             displayName: name,
@@ -28,9 +30,11 @@ module.exports = function (passport) {
           try {
             let user = await User.findOne({googleId: sub});
             if (user) {
+              console.log('User exist: ', user.displayName)
               done(null, user);
             } else {
               user = await User.create(newUser);
+              console.log('new User: ', user.displayName)
               done(null, user);
             }
           } catch (e) {
