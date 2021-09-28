@@ -34,7 +34,8 @@ app.use(session({
   saveUninitialized: false,
   rolling: true,
   cookie: {
-    expires: 86400000
+    expires: 86400000,
+    secure: true
   },
   store: MongoStore.create({mongoUrl: process.env.MONGO_URI})
 }));
@@ -59,7 +60,7 @@ app.use(cors({
   credentials: true // allow session cookie from browser to pass through
 }));
 
-//app.use(coockieParser(process.env.SECRET_KEY_PARSER));
+app.use(coockieParser(process.env.SECRET_KEY_PARSER));
 
 // Routes
 app.use('/auth', require('./routes/auth'));
