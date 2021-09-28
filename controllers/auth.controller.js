@@ -3,9 +3,7 @@
 exports.getUserOnSuccessSignIn = async (req, res) => {
   try{
     const {displayName, image} = req.user;
-    console.log(req.user);
-    console.log(req.cookie);
-    console.log(req.cookies);
+    console.log(req);
     res.status(200).json({user: {displayName, image}});
   } catch(e){
     res.status(500).send({
