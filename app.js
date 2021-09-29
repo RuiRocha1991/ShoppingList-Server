@@ -47,7 +47,7 @@ require('./config/passport')(passport);
 
 // Set global var
 app.use(function (req, res, next) {
-  res.locals.user = req.user || null;
+  res.locals.token = req.headers.token || null;
   next();
 })
 
