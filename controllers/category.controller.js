@@ -2,7 +2,7 @@ const categoryRepository = require('../repository/category.repository');
 
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await categoryRepository.getAllCategories(req.user._id);
+    const categories = await categoryRepository.getAllCategories(res.locals.user._id);
     res.status(200).json({categories: categories, token: res.locals.token});
   } catch (err) {
     console.error(err);
@@ -12,7 +12,7 @@ exports.getCategories = async (req, res) => {
 
 exports.addCategory = async (req, res) => {
   try {
-    req.body.user = req.user._id;
+    req.body.user = res.locals.user._id;
     await categoryRepository.createCategory(req.body);
     res.status(201).json({message: "Category created successfully", token: res.locals.token});
   } catch (err) {
@@ -30,7 +30,7 @@ exports.editCategory = async (req, res) => {
       return res.status(404).send({success: false, message: 'Category not found!', token: res.locals.token });
     }
 
-    if (!category.user._id.equals(req.user._id)) {
+    if (!category.user._id.equals(res.locals.user._id)) {
       return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
     } else {
       let updatedCategory = {
@@ -56,7 +56,7 @@ exports.deleteCategory = async (req, res) => {
       return res.status(404).send({success: false, message: 'Category not found!', token: res.locals.token });
     }
 
-    if (!category.user._id.equals(req.user._id)) {
+    if (!category.user._id.equals(res.locals.user._id)) {
       return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
     } else {
       await categoryRepository.deleteCategory(req.params.id);
