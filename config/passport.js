@@ -16,12 +16,11 @@ module.exports = function (passport) {
               audience: process.env.GOOGLE_CLIENT_ID
             }
         ).then(async (response) => {
-          const {name, sub, given_name, family_name, picture} = response.getPayload();
+          const {name, sub, email, picture} = response.getPayload();
           const newUser = {
             googleId: sub,
-            displayName: name,
-            firstName: given_name,
-            lastName: family_name,
+            name: name,
+            email: email,
             image: picture
           };
 
