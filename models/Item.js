@@ -17,6 +17,16 @@ const ItemScheme = new mongoose.Schema({
   category:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
+    required:true
+  },
+  defaultQuantity: {
+    type: Number,
+    required: true
+  },
+  unitMeasurement:{
+    type: String,
+    required: true,
+    enum: ["Kilogramas", "Gramas", "Metros", "Unidades", "Litros"]
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

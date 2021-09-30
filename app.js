@@ -64,6 +64,7 @@ app.use(coockieParser(process.env.SECRET_KEY_PARSER));
 app.use('/auth', require('./routes/auth'));
 app.use('/dashboard', require('./routes/dashboard'));
 app.use('/category', require('./routes/category.router'));
+app.use('/item', require('./routes/item.router'));
 
 
 const PORT = process.env.PORT || 3001;
