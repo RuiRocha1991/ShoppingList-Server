@@ -22,3 +22,7 @@ exports.updateItem = async (itemId, updatedItem) => {
     runValidators: true
   });
 }
+
+exports.deleteItem = async (itemId) => {
+  await Item.remove({_id: itemId});
+}

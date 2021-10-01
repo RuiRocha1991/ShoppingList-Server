@@ -9,4 +9,6 @@ router.post('/', ensureAuth, itemController.addItem);
 
 router.put('/:id', ensureAuth, itemController.editItem);
 
+router.delete('/:id', ensureAuth, itemController.deleteItem);
+
 module.exports = router;

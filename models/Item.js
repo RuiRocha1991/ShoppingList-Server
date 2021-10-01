@@ -6,10 +6,6 @@ const ItemScheme = new mongoose.Schema({
     required: true,
     index: true
   },
-  description: {
-    type: String,
-    required: false
-  },
   createdAt: {
     type: Date,
     default: Date.now

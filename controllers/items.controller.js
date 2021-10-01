@@ -39,7 +39,6 @@ exports.editItem = async (req, res) => {
       let updatedItem = {
         ...item,
         name: req.body.name,
-        description: req.body.description,
         category: req.body.category,
         defaultQuantity: req.body.defaultQuantity,
         unitMeasurement: req.body.unitMeasurement,
@@ -53,6 +52,25 @@ exports.editItem = async (req, res) => {
     if (err.name === 'MongoError' && err.code === 11000) {
       return res.status(500).send({ success: false, message: 'Item name already exist!', token: res.locals.token });
     }
+    return res.status(500).send({err, token: res.locals.token});
+  }
+}
+
+exports.deleteItem = async (req, res) => {
+  try {
+    const item = await itemRepository.getItemById(req.params.id);
+    if (!item) {
+      return res.status(404).send({success: false, message: 'Item not found!', token: res.locals.token });
+    }
+
+    if (!item.user.equals(res.locals.user._id)) {
+      return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
+    } else {
+      await itemRepository.deleteItem(item._id);
+      res.status(200).json({message: "Item deleted successfully", token: res.locals.token});
+    }
+  } catch (err) {
+    console.error(err);
     return res.status(500).send({err, token: res.locals.token});
   }
 }
