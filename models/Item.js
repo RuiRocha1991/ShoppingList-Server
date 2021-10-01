@@ -33,6 +33,10 @@ const ItemScheme = new mongoose.Schema({
     ref: 'User',
     index: true
   },
+  updatedAt:{
+    type: Date,
+    default: Date.now
+  }
 });
 
 ItemScheme.index({ name: 1, user: 1 }, { unique: true })

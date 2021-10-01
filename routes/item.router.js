@@ -7,4 +7,6 @@ router.get('/', ensureAuth, itemController.getItemsByUserId);
 
 router.post('/', ensureAuth, itemController.addItem);
 
+router.put('/:id', ensureAuth, itemController.editItem);
+
 module.exports = router;

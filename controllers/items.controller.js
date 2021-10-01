@@ -25,3 +25,34 @@ exports.addItem = async (req, res) => {
     return res.status(500).send({err, token: res.locals.token});
   }
 }
+
+exports.editItem = async (req, res) => {
+  try {
+    const item = await itemRepository.getItemById(req.params.id);
+    if (!item) {
+      return res.status(404).send({success: false, message: 'Category not found!', token: res.locals.token });
+    }
+
+    if (!item.user.equals(res.locals.user._id)) {
+      return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
+    } else {
+      let updatedItem = {
+        ...item,
+        name: req.body.name,
+        description: req.body.description,
+        category: req.body.category,
+        defaultQuantity: req.body.defaultQuantity,
+        unitMeasurement: req.body.unitMeasurement,
+        updatedAt: Date.now()
+      }
+      await itemRepository.updateItem(req.params.id, updatedItem);
+      res.status(200).json({message: "Item updated successfully", token: res.locals.token});
+    }
+  } catch (err) {
+    console.log(err);
+    if (err.name === 'MongoError' && err.code === 11000) {
+      return res.status(500).send({ success: false, message: 'Item name already exist!', token: res.locals.token });
+    }
+    return res.status(500).send({err, token: res.locals.token});
+  }
+}

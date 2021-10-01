@@ -10,3 +10,15 @@ exports.getAllItemsByUserId = (userId) => {
 exports.createItem = async (item) => {
   await Item.create(item);
 }
+
+exports.getItemById = async (itemId) => {
+  return Item.findById(itemId)
+  .lean();
+}
+
+exports.updateItem = async (itemId, updatedItem) => {
+  await Item.findOneAndUpdate({_id: itemId}, updatedItem, {
+    new: true,
+    runValidators: true
+  });
+}
