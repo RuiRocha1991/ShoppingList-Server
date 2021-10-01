@@ -7,6 +7,13 @@ exports.getAllCategories = (userId) => {
   .lean();
 }
 
+exports.getAllCategoriesWithFilterProperties = (userId, fields) => {
+  return Category.find({user: userId}, fields)
+  .sort({name: 'asc'})
+  .lean();
+}
+
+
 exports.createCategory = async (category) => {
   await Category.create(category);
 }

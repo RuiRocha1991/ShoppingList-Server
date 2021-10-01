@@ -26,7 +26,7 @@ const ItemScheme = new mongoose.Schema({
   unitMeasurement:{
     type: String,
     required: true,
-    enum: ["Kilogramas", "Gramas", "Metros", "Unidades", "Litros"]
+    enum: ["kilogramas", "gramas", "metros", "unidades", "litros"]
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

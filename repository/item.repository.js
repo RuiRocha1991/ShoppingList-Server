@@ -6,3 +6,7 @@ exports.getAllItemsByUserId = (userId) => {
   .sort({name: 'asc'})
   .lean();
 }
+
+exports.createItem = async (item) => {
+  await Item.create(item);
+}

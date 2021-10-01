@@ -5,4 +5,6 @@ const {ensureAuth} = require('../middleware/auth');
 
 router.get('/', ensureAuth, itemController.getItemsByUserId);
 
+router.post('/', ensureAuth, itemController.addItem);
+
 module.exports = router;
