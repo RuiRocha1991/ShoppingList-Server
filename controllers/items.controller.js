@@ -1,31 +1,12 @@
 const itemRepository = require('../repository/item.repository');
 const categoryRepository = require('../repository/category.repository');
 
-exports.getItemsByUserId = async (req, res) => {
-  try {
-    const items = await itemRepository.getAllItemsByUserId(res.locals.user._id);
-    const categories = await categoryRepository.getAllCategoriesWithFilterProperties(res.locals.user._id, '_id name');
-    res.status(200).json({items, token: res.locals.token, categories});
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({message: 'Error getting all your items', err, token: res.locals.token});
-  }
-}
-
-exports.getItemsByUserIdPaginated = async (req, res) => {
-  try {
-    const items = await itemRepository.getAllItemsByUserIdPaginated(res.locals.user._id, req.params.page, req.params.rowsPerPage);
-    const categories = await categoryRepository.getAllCategoriesWithFilterProperties(res.locals.user._id, '_id name');
-    res.status(200).json({items, token: res.locals.token, categories});
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({message: 'Error getting all your items', err, token: res.locals.token});
-  }
-}
-
 exports.addItem = async (req, res) => {
   try {
     const category = await  categoryRepository.getCategoryById(req.params.categoryId);
+    if(!category.user._id.equals(res.locals.user._id)) {
+      return res.status(403).send({success: false, message: 'Resource not available!', token: res.locals.token });
+    }
     req.body.user = res.locals.user._id;
     req.body.category = category._id;
     const item = await itemRepository.createItem(req.body);
@@ -101,7 +82,7 @@ const getValuesAndValidate = async (itemId, categoryId, userId) => {
   if (!item.user.equals(userId) || !category.user._id.equals(userId)) {
     return {
       success: false,
-      code: 401,
+      code: 403,
       message: 'Resource is not available!'
     }
   }
