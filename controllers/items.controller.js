@@ -25,8 +25,12 @@ exports.getItemsByUserIdPaginated = async (req, res) => {
 
 exports.addItem = async (req, res) => {
   try {
+    const category = await  categoryRepository.getCategoryById(req.params.categoryId);
     req.body.user = res.locals.user._id;
-    await itemRepository.createItem(req.body);
+    req.body.category = category._id;
+    const item = await itemRepository.createItem(req.body);
+    category.items.push(item);
+    await categoryRepository.updateCategory(category._id, category);
     res.status(201).json({message: "Item created successfully", token: res.locals.token});
   } catch (err) {
     console.log(err);
@@ -39,25 +43,22 @@ exports.addItem = async (req, res) => {
 
 exports.editItem = async (req, res) => {
   try {
-    const item = await itemRepository.getItemById(req.params.id);
-    if (!item) {
-      return res.status(404).send({success: false, message: 'Category not found!', token: res.locals.token });
+   const values = await getValuesAndValidate(req.params.itemId, req.params.categoryId, res.locals.user._id);
+   if (!values.success) {
+     return res.status(values.code).send({success: values.success, message: values.message, token: res.locals.token });
+   }
+   const item = values.item;
+    let updatedItem = {
+      ...item,
+      name: req.body.name,
+      category: values.category._id,
+      defaultQuantity: req.body.defaultQuantity,
+      unitMeasurement: req.body.unitMeasurement,
+      updatedAt: Date.now()
     }
+    await itemRepository.updateItem(item._id, updatedItem);
+    res.status(200).json({message: "Item updated successfully", token: res.locals.token});
 
-    if (!item.user.equals(res.locals.user._id)) {
-      return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
-    } else {
-      let updatedItem = {
-        ...item,
-        name: req.body.name,
-        category: req.body.category,
-        defaultQuantity: req.body.defaultQuantity,
-        unitMeasurement: req.body.unitMeasurement,
-        updatedAt: Date.now()
-      }
-      await itemRepository.updateItem(req.params.id, updatedItem);
-      res.status(200).json({message: "Item updated successfully", token: res.locals.token});
-    }
   } catch (err) {
     console.log(err);
     if (err.name === 'MongoError' && err.code === 11000) {
@@ -69,19 +70,52 @@ exports.editItem = async (req, res) => {
 
 exports.deleteItem = async (req, res) => {
   try {
-    const item = await itemRepository.getItemById(req.params.id);
-    if (!item) {
-      return res.status(404).send({success: false, message: 'Item not found!', token: res.locals.token });
+    const values = await getValuesAndValidate(req.params.itemId, req.params.categoryId, res.locals.user._id);
+    if (!values.success) {
+      return res.status(values.code).send({success: values.success, message: values.message, token: res.locals.token });
     }
+    await itemRepository.deleteItem(values.item._id);
+    const items = values.category.items.filter(item => !item._id.equals(values.item._id));
+    values.category.items = items;
+    await categoryRepository.updateCategory(values.category._id, values.category);
+    res.status(200).json({message: "Item deleted successfully", token: res.locals.token});
 
-    if (!item.user.equals(res.locals.user._id)) {
-      return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
-    } else {
-      await itemRepository.deleteItem(item._id);
-      res.status(200).json({message: "Item deleted successfully", token: res.locals.token});
-    }
   } catch (err) {
     console.error(err);
     return res.status(500).send({err, token: res.locals.token});
+  }
+}
+
+const getValuesAndValidate = async (itemId, categoryId, userId) => {
+  const item = await itemRepository.getItemById(itemId);
+  const category = await categoryRepository.getCategoryById(categoryId);
+
+  if (!item || !category) {
+    return {
+      success: false,
+      code: 404,
+      message: 'Resource not found!'
+    }
+  }
+
+  if (!item.user.equals(userId) || !category.user._id.equals(userId)) {
+    return {
+      success: false,
+      code: 401,
+      message: 'Resource is not available!'
+    }
+  }
+  const items = category.items.filter(value => value._id.equals(item._id));
+  if (items.length === 0) {
+    return {
+      success: false,
+      code: 404,
+      message: 'Item not available in this category'
+    }
+  }
+  return {
+    success: true,
+    item: item,
+    category: category
   }
 }

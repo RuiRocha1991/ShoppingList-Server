@@ -23,6 +23,10 @@ const CategorySchema = new mongoose.Schema({
     ref: 'User',
     index: true
   },
+  items: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Item',
+  }]
 });
 
 CategorySchema.index({ name: 1, user: 1 }, { unique: true })

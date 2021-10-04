@@ -3,6 +3,7 @@ const Category = require('../models/Category');
 exports.getAllCategories = (userId) => {
   return Category.find({user: userId})
   .populate('user')
+  .populate('items', '_id name defaultQuantity unitMeasurement', null, { sort: { 'name': 1 } })
   .sort({name: 'asc'})
   .lean();
 }
@@ -25,6 +26,7 @@ exports.getCategoryById = async (categoryId) => {
 }
 
 exports.updateCategory = async (categoryId, updatedCategory) => {
+  updatedCategory.updatedAt = Date.now();
   await Category.findOneAndUpdate({_id: categoryId}, updatedCategory, {
     new: true,
     runValidators: true

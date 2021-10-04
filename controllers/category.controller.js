@@ -1,4 +1,5 @@
 const categoryRepository = require('../repository/category.repository');
+const itemRepository = require('../repository/item.repository');
 
 exports.getCategories = async (req, res) => {
   try {
@@ -13,9 +14,11 @@ exports.getCategories = async (req, res) => {
 exports.addCategory = async (req, res) => {
   try {
     req.body.user = res.locals.user._id;
+    req.body.items = [];
     await categoryRepository.createCategory(req.body);
     res.status(201).json({message: "Category created successfully", token: res.locals.token});
   } catch (err) {
+    console.log(err);
     if (err.name === 'MongoError' && err.code === 11000) {
       return res.status(500).send({ success: false, message: 'Category already exist!' , token: res.locals.token});
     }
@@ -59,6 +62,7 @@ exports.deleteCategory = async (req, res) => {
     if (!category.user._id.equals(res.locals.user._id)) {
       return res.status(401).send({success: false, message: 'Resource is not available', token: res.locals.token });
     } else {
+      await itemRepository.deleteItemOnCategory(req.params.id);
       await categoryRepository.deleteCategory(req.params.id);
       res.status(200).json({message: "Category deleted successfully", token: res.locals.token});
     }

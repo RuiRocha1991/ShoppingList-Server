@@ -27,7 +27,7 @@ exports.getAllItemsByUserIdPaginated = (userId, page, rowsPerPage) => {
   })
 }
 exports.createItem = async (item) => {
-  await Item.create(item);
+  return await Item.create(item);
 }
 
 exports.getItemById = async (itemId) => {
@@ -44,4 +44,8 @@ exports.updateItem = async (itemId, updatedItem) => {
 
 exports.deleteItem = async (itemId) => {
   await Item.remove({_id: itemId});
+}
+
+exports.deleteItemOnCategory = async (categoryId) => {
+  await Item.remove({category: categoryId});
 }
