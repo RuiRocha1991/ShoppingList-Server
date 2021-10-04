@@ -12,6 +12,17 @@ exports.getItemsByUserId = async (req, res) => {
   }
 }
 
+exports.getItemsByUserIdPaginated = async (req, res) => {
+  try {
+    const items = await itemRepository.getAllItemsByUserIdPaginated(res.locals.user._id, req.params.page, req.params.rowsPerPage);
+    const categories = await categoryRepository.getAllCategoriesWithFilterProperties(res.locals.user._id, '_id name');
+    res.status(200).json({items, token: res.locals.token, categories});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: 'Error getting all your items', err, token: res.locals.token});
+  }
+}
+
 exports.addItem = async (req, res) => {
   try {
     req.body.user = res.locals.user._id;

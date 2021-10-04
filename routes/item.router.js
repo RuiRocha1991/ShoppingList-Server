@@ -5,6 +5,8 @@ const {ensureAuth} = require('../middleware/auth');
 
 router.get('/', ensureAuth, itemController.getItemsByUserId);
 
+router.get('/:page/:rowsPerPage', ensureAuth, itemController.getItemsByUserIdPaginated);
+
 router.post('/', ensureAuth, itemController.addItem);
 
 router.put('/:id', ensureAuth, itemController.editItem);
