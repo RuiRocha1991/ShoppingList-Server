@@ -18,11 +18,39 @@ const ShoppingListSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  user: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     index: true
   },
+  categories: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category'
+    }
+  ],
+  selectedItems:[
+    {
+      ItemOnList: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ItemOnList'
+      },
+      quantity: {
+        type: Number,
+        required: true
+      },
+      isCollected: {
+        type: Boolean,
+        default: false
+      }
+    }
+  ],
+  unselectedItem:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ItemOnList'
+    }
+  ],
 });
 
 ShoppingListSchema.index({ name: 1, user: 1 }, { unique: true })
