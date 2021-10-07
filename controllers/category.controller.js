@@ -11,6 +11,16 @@ exports.getCategories = async (req, res) => {
   }
 }
 
+exports.getCategoriesToShoppingList = async (req, res) => {
+  try {
+    const categories = await categoryRepository.getAllCategoriesToShoppingList(res.locals.user._id);
+    res.status(200).json({categories: categories, token: res.locals.token});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
+  }
+}
+
 exports.addCategory = async (req, res) => {
   try {
     req.body.user = res.locals.user._id;

@@ -1,7 +1,7 @@
 const ShoppingList = require('../models/ShoppingList');
 
 exports.getAllShoppingLists = (userId) => {
-  return ShoppingList.find({user: userId})
+  return ShoppingList.find({owner: userId})
   .populate('owner')
   .populate('categories', '_id name', null, { sort: { 'name': 1 } })
   .populate({
@@ -28,4 +28,8 @@ exports.getAllShoppingLists = (userId) => {
   })
   .sort({name: 'asc'})
   .lean();
+}
+
+exports.createShoppingList = async (shoppingList) => {
+  return await ShoppingList.create(shoppingList);
 }

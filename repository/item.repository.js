@@ -23,3 +23,7 @@ exports.deleteItem = async (itemId) => {
 exports.deleteItemOnCategory = async (categoryId) => {
   await Item.remove({category: categoryId});
 }
+
+exports.getItemsByArrayIds = (itemsIds, userId) => {
+  return Item.find({ '_id': { $in: itemsIds}, 'user':  { $in: userId }}).lean();
+}

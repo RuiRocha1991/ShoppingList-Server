@@ -5,6 +5,8 @@ const {ensureAuth} = require('../middleware/auth');
 
 router.get('/', ensureAuth, categoryController.getCategories);
 
+router.get('/shopping-list', ensureAuth, categoryController.getCategoriesToShoppingList);
+
 //#region POST
 router.post('/', ensureAuth, categoryController.addCategory);
 //#endregion

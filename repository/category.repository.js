@@ -8,6 +8,16 @@ exports.getAllCategories = (userId) => {
   .lean();
 }
 
+exports.getAllCategoriesToShoppingList = (userId) => {
+  return Category.find({user: userId}, '_id name')
+  .sort({name: 'asc'})
+  .lean();
+}
+
+exports.getCategoryByArrayIds = (categoriesIds, userId) => {
+  return Category.find({ '_id': { $in: categoriesIds}, 'user':  { $in: userId }}).lean();
+}
+
 exports.createCategory = async (category) => {
   await Category.create(category);
 }
