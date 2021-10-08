@@ -33,3 +33,7 @@ exports.getAllShoppingLists = (userId) => {
 exports.createShoppingList = async (shoppingList) => {
   return await ShoppingList.create(shoppingList);
 }
+
+exports.getShoppingListById = async (id) => {
+  return await ShoppingList.findById(id);
+}

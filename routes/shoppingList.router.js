@@ -7,4 +7,6 @@ router.get('/', ensureAuth, shoppingListController.getShoppingList);
 
 router.post('/', ensureAuth, shoppingListController.addShoppingList);
 
+router.put('/:id', ensureAuth, shoppingListController.editShoppingList);
+
 module.exports = router;

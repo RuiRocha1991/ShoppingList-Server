@@ -25,5 +25,5 @@ exports.deleteItemOnCategory = async (categoryId) => {
 }
 
 exports.getItemsByArrayIds = (itemsIds, userId) => {
-  return Item.find({ '_id': { $in: itemsIds}, 'user':  { $in: userId }}).lean();
+  return Item.find({ '_id': { $in: itemsIds}, 'user':  { $in: userId }}, '_id').lean();
 }
