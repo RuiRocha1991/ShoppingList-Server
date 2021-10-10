@@ -31,7 +31,7 @@ const ShoppingListSchema = new mongoose.Schema({
   ],
   selectedItems:[
     {
-      ItemOnList: {
+      itemOnList: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ItemOnList'
       },
@@ -45,7 +45,7 @@ const ShoppingListSchema = new mongoose.Schema({
       }
     }
   ],
-  unselectedItem:[
+  unselectedItems:[
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ItemOnList'
@@ -53,6 +53,6 @@ const ShoppingListSchema = new mongoose.Schema({
   ],
 });
 
-ShoppingListSchema.index({ name: 1, user: 1 }, { unique: true })
+ShoppingListSchema.index({ name: 1, owner: 1 }, { unique: true })
 
 module.exports = mongoose.model('ShoppingList', ShoppingListSchema);

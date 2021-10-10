@@ -6,5 +6,5 @@ exports.createItemOnList = async (itemOnList) => {
 }
 
 exports.deleteItemsOnList = async (itemsOnList) => {
-  await ItemOnList.deleteMany({ item: { $in: itemsOnList } });
+  await ItemOnList.deleteMany({ _id: { $in: itemsOnList } });
 }

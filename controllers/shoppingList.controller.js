@@ -6,6 +6,13 @@ const itemOnListRepository = require('../repository/itemOnList.repository');
 exports.getShoppingList = async (req, res) => {
   try {
     const shoppingList = await shoppingListRepository.getAllShoppingLists(res.locals.user._id);
+
+    for (const shoppingListKey in shoppingList) {
+      shoppingList[shoppingListKey] = {
+        ...shoppingList[shoppingListKey],
+        listItems:[{listName: 'Selected Items', list: shoppingList[shoppingListKey].selectedItems},{listName: 'Unselected Items', list:shoppingList[shoppingListKey].unselectedItems}]
+      }
+    }
     res.status(200).json({shoppingLists: shoppingList, token: res.locals.token});
   } catch (err) {
     console.error(err);
@@ -17,48 +24,84 @@ exports.addShoppingList = async (req, res) => {
   try {
     req.body.owner = res.locals.user._id;
     req.body.selectedItems = [];
-    const categories = await categoryRepository.getCategoryByArrayIds(req.body.categories, res.locals.user._id);
-    let itemsIds = [];
-    for (let index in categories) {
-      itemsIds = itemsIds.concat(categories[index].items);
-    }
-    const items = await itemRepository.getItemsByArrayIds(itemsIds, res.locals.user._id);
-    req.body.unselectedItem = await Promise.all(items.map(async (item, index) => {
-      const itemOnList = {
-        item,
-        rankWhenSelected:index,
-        rankWhenUnselected: index
-      }
-      const newItemOnList = await itemOnListRepository.createItemOnList(itemOnList);
-      return newItemOnList._id
-    }))
+    const {categories, newsItems} = await addItemsOnShoppingList(req.body.categories, res.locals.user._id);
+    req.body.unselectedItems = newsItems;
     req.body.categories = categories.map(category => category._id);
+    console.log(req.body)
     await shoppingListRepository.createShoppingList(req.body);
     res.status(200).json({message: "List created successfully", token: res.locals.token});
   } catch (err) {
     console.error(err);
+    if (err.name === 'MongoError' && err.code === 11000) {
+      return res.status(500).send({ success: false, message: 'Shopping List name already exist!', token: res.locals.token });
+    }
     res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
   }
 }
 
 exports.editShoppingList = async (req, res) => {
   try {
-    const shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    let shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
     const oldCategories = await categoryRepository.getCategoryByArrayIds(shoppingList.categories, res.locals.user._id);
     const newCategories = await categoryRepository.getCategoryByArrayIds(req.body.categories, res.locals.user._id);
-
-    const categoriesAdded = newCategories.filter((cat) => oldCategories.find((cat2) => cat2._id.equals(cat._id)) === undefined);
-    const categoriesRemoved = oldCategories.filter((cat) => newCategories.find((cat2) => cat2._id.equals(cat._id)) === undefined);
-    let itemsIds = [];
-    for (let index in categoriesRemoved) {
-      itemsIds = itemsIds.concat(categoriesRemoved[index].items);
+    if (!shoppingList || !oldCategories|| !newCategories) {
+      return res.status(404).send({success: false, message: 'Resource not found', token: res.locals.token });
     }
-    const itemsRemoved = await itemRepository.getItemsByArrayIds(itemsIds, res.locals.user._id);
-    itemOnListRepository.deleteItemsOnList(itemsRemoved.map(item => item._id));
+
+    const categoriesAdded = await filterCategories(newCategories, oldCategories);
+    const categoriesRemoved = await filterCategories(oldCategories, newCategories);
+
+    const removedItemsOnUnselectedList = shoppingList.unselectedItems.filter( itemOnList => categoriesRemoved.find(category => category.equals(itemOnList.item.category)) !== undefined);
+    const removedItemsOnSelectedList = shoppingList.selectedItems.filter( onList =>  categoriesRemoved.find(category => category.equals(onList.itemOnList.item.category)) !== undefined);
+    const removedItems = removedItemsOnUnselectedList.concat(removedItemsOnSelectedList);
+    await itemOnListRepository.deleteItemsOnList(removedItems.map(itemOnList => itemOnList._id));
+
+    const {newsItems} = await addItemsOnShoppingList(categoriesAdded, res.locals.user._id);
+
+    shoppingList.unselectedItems = shoppingList.unselectedItems.filter( itemOnList => categoriesRemoved.find(category => category.equals(itemOnList.item.category)) === undefined).concat(newsItems);
+    shoppingList.selectedItems = shoppingList.selectedItems.filter( onList =>  categoriesRemoved.find(category => category.equals(onList.itemOnList.item.category)) === undefined);
+    shoppingList.categories = newCategories;
+    shoppingList = {
+      ...shoppingList,
+      name: req.body.name,
+      description: req.body.description
+    }
+
+    await shoppingListRepository.udpateShoppingList(shoppingList);
 
     res.status(200).json({message: "List created successfully", token: res.locals.token});
   } catch (err) {
     console.error(err);
+    if (err.name === 'MongoError' && err.code === 11000) {
+      return res.status(500).send({ success: false, message: 'Shopping List name already exist!', token: res.locals.token });
+    }
     res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
   }
+}
+
+const addItemsOnShoppingList = async (categoriesIds, userId) => {
+  const categories = await categoryRepository.getCategoryByArrayIds(categoriesIds, userId);
+  let itemsIds = [];
+  for (let index in categories) {
+    itemsIds = itemsIds.concat(categories[index].items);
+  }
+  const items = await itemRepository.getItemsByArrayIds(itemsIds, userId);
+  const newsItems = await Promise.all(items.map(async (item, index) => {
+    const itemOnList = {
+      item,
+      rankWhenSelected:index,
+      rankWhenUnselected: index
+    }
+    const newItemOnList = await itemOnListRepository.createItemOnList(itemOnList);
+    return newItemOnList._id;
+  }))
+  return {newsItems, categories}
+}
+
+const filterCategories = async (target, list) => {
+  return await target
+  .filter((cat) =>
+      list
+      .find((cat2) => cat2._id.equals(cat._id)) === undefined)
+  .map(cat => cat._id);
 }

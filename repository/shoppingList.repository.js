@@ -18,7 +18,7 @@ exports.getAllShoppingLists = (userId) => {
     }
   })
   .populate({
-    path: 'unselectedItem',
+    path: 'unselectedItems',
     select:' _id item rankWhenSelected rankWhenUnselected',
     sort: { 'rankWhenUnselected': 1 },
     populate: {
@@ -35,5 +35,34 @@ exports.createShoppingList = async (shoppingList) => {
 }
 
 exports.getShoppingListById = async (id) => {
-  return await ShoppingList.findById(id);
+  return ShoppingList.findById(id)
+  .populate({
+    path: 'selectedItems',
+    select: 'ItemOnList quantity isCollected',
+    populate: {
+      path: 'ItemOnList',
+      select: '_id item rankWhenSelected rankWhenUnselected',
+      sort: {'rankWhenSelected': 1},
+      populate: {
+        path: 'item',
+        select: '_id name defaultQuantity unitMeasurement category',
+      }
+    }
+  })
+  .populate({
+    path: 'unselectedItems',
+    select: '_id item rankWhenSelected rankWhenUnselected',
+    sort: {'rankWhenUnselected': 1},
+    populate: {
+      path: 'item',
+      select: '_id name defaultQuantity unitMeasurement category',
+    }
+  }).lean();
+}
+
+exports.udpateShoppingList = async (shoppingList) => {
+  await ShoppingList.findOneAndUpdate({_id: shoppingList._id}, shoppingList, {
+    new: true,
+    runValidators: true
+  })
 }
