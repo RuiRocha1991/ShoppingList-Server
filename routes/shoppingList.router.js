@@ -9,4 +9,6 @@ router.post('/', ensureAuth, shoppingListController.addShoppingList);
 
 router.put('/:id', ensureAuth, shoppingListController.editShoppingList);
 
+router.delete('/:id', ensureAuth, shoppingListController.deleteShoppingList);
+
 module.exports = router;

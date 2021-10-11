@@ -10,7 +10,7 @@ exports.getAllShoppingLists = (userId) => {
     populate: {
       path: 'ItemOnList',
       select: '_id item rankWhenSelected rankWhenUnselected',
-      sort: { 'rankWhenSelected': 1 },
+      options: { sort: { rankWhenSelected: 1 } },
       populate: {
         path: 'item',
         select: '_id name defaultQuantity unitMeasurement',
@@ -20,7 +20,7 @@ exports.getAllShoppingLists = (userId) => {
   .populate({
     path: 'unselectedItems',
     select:' _id item rankWhenSelected rankWhenUnselected',
-    sort: { 'rankWhenUnselected': 1 },
+    options: { sort: { rankWhenUnselected: 1 } },
     populate: {
       path: 'item',
       select: '_id name defaultQuantity unitMeasurement',
@@ -65,4 +65,8 @@ exports.udpateShoppingList = async (shoppingList) => {
     new: true,
     runValidators: true
   })
+}
+
+exports.deleteShoppingList = async (shoppingListID) => {
+  await ShoppingList.remove({_id: shoppingListID});
 }

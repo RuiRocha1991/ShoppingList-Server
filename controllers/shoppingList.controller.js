@@ -69,12 +69,36 @@ exports.editShoppingList = async (req, res) => {
 
     await shoppingListRepository.udpateShoppingList(shoppingList);
 
-    res.status(200).json({message: "List created successfully", token: res.locals.token});
+    res.status(200).json({message: "List edited successfully", token: res.locals.token});
   } catch (err) {
     console.error(err);
     if (err.name === 'MongoError' && err.code === 11000) {
       return res.status(500).send({ success: false, message: 'Shopping List name already exist!', token: res.locals.token });
     }
+    res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
+  }
+}
+
+exports.deleteShoppingList = async (req, res) => {
+  try {
+    let shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    if (!shoppingList) {
+      return res.status(404).send({success: false, message: 'Resource not found', token: res.locals.token });
+    }
+
+    if(!shoppingList.owner._id.equals(res.locals.user._id)) {
+      return res.status(403).send({success: false, message: 'Resource not available!', token: res.locals.token });
+    }
+
+    const itemsToRemove = shoppingList.selectedItems.map(item => item._id).concat(shoppingList.unselectedItems.map(item => item._id));
+
+    await itemOnListRepository.deleteItemsOnList(itemsToRemove);
+
+    await shoppingListRepository.deleteShoppingList(shoppingList._id);
+
+    res.status(200).json({message: "List created successfully", token: res.locals.token});
+  } catch (err) {
+    console.error(err);
     res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
   }
 }
