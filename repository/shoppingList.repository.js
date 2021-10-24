@@ -6,15 +6,11 @@ exports.getAllShoppingLists = (userId) => {
   .populate('categories', '_id name', null, { sort: { 'name': 1 } })
   .populate({
     path: 'selectedItems',
-    select:' ItemOnList quantity isCollected',
+    select:' _id item rankWhenSelected rankWhenUnselected quantity',
+    options: { sort: { rankWhenUnselected: 1 } },
     populate: {
-      path: 'ItemOnList',
-      select: '_id item rankWhenSelected rankWhenUnselected',
-      options: { sort: { rankWhenSelected: 1 } },
-      populate: {
-        path: 'item',
-        select: '_id name defaultQuantity unitMeasurement',
-      }
+      path: 'item',
+      select: '_id name defaultQuantity unitMeasurement',
     }
   })
   .populate({
@@ -38,15 +34,11 @@ exports.getShoppingListById = async (id) => {
   return ShoppingList.findById(id)
   .populate({
     path: 'selectedItems',
-    select: 'ItemOnList quantity isCollected',
+    select: '_id item rankWhenSelected rankWhenUnselected',
+    sort: {'rankWhenSelected': 1},
     populate: {
-      path: 'ItemOnList',
-      select: '_id item rankWhenSelected rankWhenUnselected',
-      sort: {'rankWhenSelected': 1},
-      populate: {
-        path: 'item',
-        select: '_id name defaultQuantity unitMeasurement category',
-      }
+      path: 'item',
+      select: '_id name defaultQuantity unitMeasurement category',
     }
   })
   .populate({
@@ -61,6 +53,7 @@ exports.getShoppingListById = async (id) => {
 }
 
 exports.udpateShoppingList = async (shoppingList) => {
+  shoppingList.updatedAt = Date.now();
   await ShoppingList.findOneAndUpdate({_id: shoppingList._id}, shoppingList, {
     new: true,
     runValidators: true

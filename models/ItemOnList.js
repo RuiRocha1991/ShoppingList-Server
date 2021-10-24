@@ -13,6 +13,14 @@ const ItemOnListSchema = new mongoose.Schema({
   rankWhenUnselected: {
     type: Number,
     required: true,
+  },
+  quantity:{
+    type: Number,
+    default: 0
+  },
+  isCollected: {
+    type: Boolean,
+    default: false
   }
 });
 

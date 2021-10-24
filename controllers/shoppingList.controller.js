@@ -8,9 +8,10 @@ exports.getShoppingList = async (req, res) => {
     const shoppingList = await shoppingListRepository.getAllShoppingLists(res.locals.user._id);
 
     for (const shoppingListKey in shoppingList) {
+      const unselectedList = shoppingList[shoppingListKey].unselectedItems.map(item => ({...item, quantity: item.item.defaultQuantity}));
       shoppingList[shoppingListKey] = {
         ...shoppingList[shoppingListKey],
-        listItems:[{listName: 'Selected Items', list: shoppingList[shoppingListKey].selectedItems},{listName: 'Unselected Items', list:shoppingList[shoppingListKey].unselectedItems}]
+        unselectedItems: unselectedList,
       }
     }
     res.status(200).json({shoppingLists: shoppingList, token: res.locals.token});
@@ -27,7 +28,6 @@ exports.addShoppingList = async (req, res) => {
     const {categories, newsItems} = await addItemsOnShoppingList(req.body.categories, res.locals.user._id);
     req.body.unselectedItems = newsItems;
     req.body.categories = categories.map(category => category._id);
-    console.log(req.body)
     await shoppingListRepository.createShoppingList(req.body);
     res.status(200).json({message: "List created successfully", token: res.locals.token});
   } catch (err) {
@@ -52,14 +52,14 @@ exports.editShoppingList = async (req, res) => {
     const categoriesRemoved = await filterCategories(oldCategories, newCategories);
 
     const removedItemsOnUnselectedList = shoppingList.unselectedItems.filter( itemOnList => categoriesRemoved.find(category => category.equals(itemOnList.item.category)) !== undefined);
-    const removedItemsOnSelectedList = shoppingList.selectedItems.filter( onList =>  categoriesRemoved.find(category => category.equals(onList.itemOnList.item.category)) !== undefined);
+    const removedItemsOnSelectedList = shoppingList.selectedItems.filter( onList =>  categoriesRemoved.find(category => category.equals(onList.item.category)) !== undefined);
     const removedItems = removedItemsOnUnselectedList.concat(removedItemsOnSelectedList);
     await itemOnListRepository.deleteItemsOnList(removedItems.map(itemOnList => itemOnList._id));
 
     const {newsItems} = await addItemsOnShoppingList(categoriesAdded, res.locals.user._id);
 
     shoppingList.unselectedItems = shoppingList.unselectedItems.filter( itemOnList => categoriesRemoved.find(category => category.equals(itemOnList.item.category)) === undefined).concat(newsItems);
-    shoppingList.selectedItems = shoppingList.selectedItems.filter( onList =>  categoriesRemoved.find(category => category.equals(onList.itemOnList.item.category)) === undefined);
+    shoppingList.selectedItems = shoppingList.selectedItems.filter( onList =>  categoriesRemoved.find(category => category.equals(onList.item.category)) === undefined);
     shoppingList.categories = newCategories;
     shoppingList = {
       ...shoppingList,
@@ -103,6 +103,39 @@ exports.deleteShoppingList = async (req, res) => {
   }
 }
 
+exports.saveShoppingList = async (req, res) => {
+  try {
+    let shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    if (!shoppingList) {
+      return res.status(404).send({success: false, message: 'Resource not found', token: res.locals.token });
+    }
+
+    if(!shoppingList.owner._id.equals(res.locals.user._id)) {
+      return res.status(403).send({success: false, message: 'Resource not available!', token: res.locals.token });
+    }
+    const selectedItems = req.body.selectedItems;
+    shoppingList = {
+      ...shoppingList,
+      selectedItems:selectedItems.map(item => ({_id: item._id})),
+      unselectedItems: req.body.unselectedItems
+    }
+    for (let i in selectedItems) {
+      await itemOnListRepository.update(selectedItems[i]);
+    }
+
+    await shoppingListRepository.udpateShoppingList(shoppingList);
+    res.status(200).json({message: "List updated successfully", token: res.locals.token});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
+  }
+
+}
+
+const randomIntFromInterval = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
 const addItemsOnShoppingList = async (categoriesIds, userId) => {
   const categories = await categoryRepository.getCategoryByArrayIds(categoriesIds, userId);
   let itemsIds = [];
@@ -113,8 +146,8 @@ const addItemsOnShoppingList = async (categoriesIds, userId) => {
   const newsItems = await Promise.all(items.map(async (item, index) => {
     const itemOnList = {
       item,
-      rankWhenSelected:index,
-      rankWhenUnselected: index
+      rankWhenSelected:randomIntFromInterval(index * 100, index * 100 + 100),
+      rankWhenUnselected: randomIntFromInterval(index * 100, index * 100 + 100)
     }
     const newItemOnList = await itemOnListRepository.createItemOnList(itemOnList);
     return newItemOnList._id;
@@ -129,3 +162,4 @@ const filterCategories = async (target, list) => {
       .find((cat2) => cat2._id.equals(cat._id)) === undefined)
   .map(cat => cat._id);
 }
+

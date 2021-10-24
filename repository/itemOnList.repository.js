@@ -8,3 +8,7 @@ exports.createItemOnList = async (itemOnList) => {
 exports.deleteItemsOnList = async (itemsOnList) => {
   await ItemOnList.deleteMany({ _id: { $in: itemsOnList } });
 }
+
+exports.update = async (itemsOnList) => {
+  await ItemOnList.findByIdAndUpdate(itemsOnList._id, itemsOnList);
+}

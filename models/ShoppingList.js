@@ -31,18 +31,8 @@ const ShoppingListSchema = new mongoose.Schema({
   ],
   selectedItems:[
     {
-      itemOnList: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ItemOnList'
-      },
-      quantity: {
-        type: Number,
-        required: true
-      },
-      isCollected: {
-        type: Boolean,
-        default: false
-      }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ItemOnList'
     }
   ],
   unselectedItems:[
