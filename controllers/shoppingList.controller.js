@@ -132,6 +132,80 @@ exports.saveShoppingList = async (req, res) => {
 
 }
 
+exports.startShoppingMode = async (req, res) => {
+  try {
+    let shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    if (!shoppingList) {
+      return res.status(404).send({success: false, message: 'Resource not found', token: res.locals.token });
+    }
+    shoppingList = {
+      ...shoppingList,
+      shoppingMode: shoppingList.selectedItems
+    }
+    await shoppingListRepository.udpateShoppingList(shoppingList);
+    shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    res.status(200).json({message: "Success", shoppingList, token: res.locals.token});
+  } catch (err) {
+    res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
+  }
+}
+
+exports.saveShoppingMode = async (req, res) => {
+  try {
+    let shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    if (!shoppingList) {
+      return res.status(404).send({success: false, message: 'Resource not found', token: res.locals.token });
+    }
+
+    if (req.body._id !== req.params.id) {
+      return res.status(403).send({success: false, message: 'Resource not available', token: res.locals.token });
+    }
+
+    const items = req.body.shoppingMode;
+
+    for (let index in items) {
+      await itemOnListRepository.update(items[index]);
+    }
+
+    await shoppingListRepository.udpateShoppingList(shoppingList);
+    res.status(200).json({message: "Success", shoppingList, token: res.locals.token});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
+  }
+}
+
+exports.finishShoppingMode = async (req, res) => {
+  try {
+    let shoppingList = await shoppingListRepository.getShoppingListById(req.params.id);
+    if (!shoppingList) {
+      return res.status(404).send({success: false, message: 'Resource not found', token: res.locals.token });
+    }
+
+    if (req.body._id !== req.params.id) {
+      return res.status(403).send({success: false, message: 'Resource not available', token: res.locals.token });
+    }
+    const items = shoppingList.shoppingMode;
+
+    for (let index in items) {
+      const item = items[index];
+      item.isCollected = false;
+      await itemOnListRepository.update(item);
+    }
+    shoppingList = {
+      ...shoppingList,
+      shoppingMode: [],
+      unselectedItems: shoppingList.unselectedItems.concat(shoppingList.selectedItems),
+      selectedItems: [],
+    }
+    await shoppingListRepository.udpateShoppingList(shoppingList);
+    res.status(200).json({message: "Success", token: res.locals.token});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: 'Error getting all your categories', err, token: res.locals.token});
+  }
+}
+
 const randomIntFromInterval = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }

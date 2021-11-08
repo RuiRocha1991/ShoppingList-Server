@@ -41,6 +41,12 @@ const ShoppingListSchema = new mongoose.Schema({
       ref: 'ItemOnList'
     }
   ],
+  shoppingMode:[
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ItemOnList'
+    }
+  ],
 });
 
 ShoppingListSchema.index({ name: 1, owner: 1 }, { unique: true })

@@ -7,7 +7,7 @@ exports.getAllShoppingLists = (userId) => {
   .populate({
     path: 'selectedItems',
     select:' _id item rankWhenSelected rankWhenUnselected quantity',
-    options: { sort: { rankWhenUnselected: 1 } },
+    options: { sort: { rankWhenSelected: 1 } },
     populate: {
       path: 'item',
       select: '_id name defaultQuantity unitMeasurement',
@@ -34,22 +34,32 @@ exports.getShoppingListById = async (id) => {
   return ShoppingList.findById(id)
   .populate({
     path: 'selectedItems',
-    select: '_id item rankWhenSelected rankWhenUnselected',
-    sort: {'rankWhenSelected': 1},
+    select:' _id item rankWhenSelected rankWhenUnselected quantity',
+    options: { sort: { rankWhenSelected: 1 } },
+    populate: {
+      path: 'item',
+      select: '_id name defaultQuantity unitMeasurement',
+    }
+  })
+  .populate({
+    path: 'unselectedItems',
+    select:' _id item rankWhenSelected rankWhenUnselected',
+    options: { sort: { rankWhenUnselected: 1 } },
+    populate: {
+      path: 'item',
+      select: '_id name defaultQuantity unitMeasurement',
+    }
+  })
+  .populate({
+    path: 'shoppingMode',
+    select: '_id item rankWhenSelected rankWhenUnselected quantity isCollected',
+    options: { sort: { rankWhenSelected: 1 } },
     populate: {
       path: 'item',
       select: '_id name defaultQuantity unitMeasurement category',
     }
   })
-  .populate({
-    path: 'unselectedItems',
-    select: '_id item rankWhenSelected rankWhenUnselected',
-    sort: {'rankWhenUnselected': 1},
-    populate: {
-      path: 'item',
-      select: '_id name defaultQuantity unitMeasurement category',
-    }
-  }).lean();
+  .lean();
 }
 
 exports.udpateShoppingList = async (shoppingList) => {
